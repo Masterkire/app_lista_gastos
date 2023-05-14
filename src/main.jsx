@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import WebFont from 'webfontloader';
+import Contenedor from './elementos/Contenedor';
 
 WebFont.load({
   google: {
@@ -13,7 +14,9 @@ WebFont.load({
 
 const Index = () => {
   return ( 
-    <App />
+    <Contenedor>
+      <App />
+    </Contenedor>
    );
 }
  
