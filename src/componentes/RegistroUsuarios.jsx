@@ -4,8 +4,12 @@ import {Header, Titulo, ContenedorHeader} from './../elementos/Header';
 import {Boton} from './../elementos/Boton';
 import {Formulario, Input, ContenedorBoton} from './../elementos/ElementosDeFormulario';
 import SvgLogin from './../ComponentSvg/SvgLogin';
+import {auth} from './../firebase/firebaseConfig';
+import {useNavigate} from 'react-router-dom';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const RegistroUsuarios = () => {
+    const navigate = useNavigate();
     const [correo, establecerCorreo] = useState('');
     const [password, establecerPassword] = useState('');
     const [password2, establecerPassword2] = useState('');
@@ -26,7 +30,7 @@ const RegistroUsuarios = () => {
         }
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Comprobamos del lado del cliente que el correo sea valido.
@@ -46,7 +50,30 @@ const RegistroUsuarios = () => {
             return;
         }
 
-        console.log('Registramos un usuario');
+        try {
+            await createUserWithEmailAndPassword( auth, correo, password);
+            navigate('/');
+        } catch (error) {
+            console.log(error);
+            
+            let mensaje;
+            switch(error.code){
+                case 'auth/invalid-password':
+                    mensaje = 'La contraseña tiene que ser de al menos 6 caracteres.'
+                    break;
+                case 'auth/email-already-in-use':
+                    mensaje = 'Ya existe una cuenta con el correo electronico proporcionado.'
+                    break;
+                case 'auth/invalid-email':
+                    mensaje = 'El correo electronico no es valido.'
+                    break;
+                default:
+                    mensaje = 'Hubo un error al intentar crear la cuenta.'
+                    break;
+            }
+            console.log(mensaje);
+        }
+
     }
 
     return ( 
