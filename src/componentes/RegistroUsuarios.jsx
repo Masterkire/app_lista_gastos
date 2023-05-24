@@ -7,12 +7,15 @@ import SvgLogin from './../ComponentSvg/SvgLogin';
 import {auth} from './../firebase/firebaseConfig';
 import {useNavigate} from 'react-router-dom';
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import Alerta from './../elementos/Alerta';
 
 const RegistroUsuarios = () => {
     const navigate = useNavigate();
     const [correo, establecerCorreo] = useState('');
     const [password, establecerPassword] = useState('');
     const [password2, establecerPassword2] = useState('');
+    const [estadoAlerta, cambiarEstadoAlerta] = useState(false);
+    const [alerta, cambiarAlerta] = useState({});
 
     const handleChange = (e) => {
         switch(e.target.name){
@@ -32,21 +35,35 @@ const RegistroUsuarios = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        cambiarEstadoAlerta(false);
+        cambiarAlerta({});
 
         // Comprobamos del lado del cliente que el correo sea valido.
         const expresionRegular = /[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/;
         if(!expresionRegular.test(correo)){
-            console.log('Por favor ingresa un correo valido');
+            cambiarEstadoAlerta(true);
+            cambiarAlerta({
+                tipo: 'error',
+                mensaje: 'Por favor ingresa un correo electronico valido'
+            })
             return;
         }
 
         if(correo === '' || password === '' || password2 === ''){
-            console.log('Por favor rellena todos los datos');
+            cambiarEstadoAlerta(true);
+            cambiarAlerta({
+                tipo: 'error',
+                mensaje: 'Por favor rellena todos los datos'
+            })
             return;
         }
 
         if(password != password2){
-            console.log('Las contraseñas no son iguales');
+            cambiarEstadoAlerta(true);
+            cambiarAlerta({
+                tipo: 'error',
+                mensaje: 'Las contraseñas no son iguales'
+            })
             return;
         }
 
@@ -54,7 +71,7 @@ const RegistroUsuarios = () => {
             await createUserWithEmailAndPassword( auth, correo, password);
             navigate('/');
         } catch (error) {
-            console.log(error);
+            cambiarEstadoAlerta(true);
             
             let mensaje;
             switch(error.code){
@@ -71,7 +88,7 @@ const RegistroUsuarios = () => {
                     mensaje = 'Hubo un error al intentar crear la cuenta.'
                     break;
             }
-            console.log(mensaje);
+            cambiarAlerta({tipo: "error", mensaje: mensaje});
         }
 
     }
@@ -118,6 +135,13 @@ const RegistroUsuarios = () => {
                     <Boton as="button" primario type='submit'>Crear Cuenta</Boton>
                 </ContenedorBoton>
             </Formulario>
+
+            <Alerta 
+                tipo={alerta.tipo}
+                mensaje={alerta.mensaje}
+                estadoAlerta={estadoAlerta}
+                cambiarEstadoAlerta={cambiarEstadoAlerta}
+            />
         </>
      );
 }
