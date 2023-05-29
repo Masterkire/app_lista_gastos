@@ -1,4 +1,4 @@
-// import React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import IconoFlecha from './../ComponentSvg/Flecha.jsx';
 import {useNavigate} from 'react-router-dom';

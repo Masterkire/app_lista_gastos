@@ -1,4 +1,4 @@
-// import React from "react";
+import React from "react";
 import styled from "styled-components";
 import LogoSvg from "../ComponentSvg/LogoSvg.jsx";
 import LogoSvg2 from "../ComponentSvg/LogoSvg2";
