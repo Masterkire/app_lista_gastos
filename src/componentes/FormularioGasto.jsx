@@ -7,8 +7,12 @@ import {
   ContenedorBoton,
 } from "./../elementos/ElementosDeFormulario";
 import DatePicker from './DatePicker';
+import fromUnixTime from 'date-fns/fromUnixTime'
+import getUnixTime from 'date-fns/getUnixTime'
 import { Boton } from "./../elementos/Boton";
 import SelectCategorias from "./SelectCategorias";
+import agregarGasto from './../firebase/agregarGasto';
+import {useAuth} from './../contextos/AuthContext';
 
 const IconoPlus = () => {
   return (
@@ -28,6 +32,7 @@ const FormularioGasto = () => {
   const [inputCantidad, cambiarInputCantidad] = useState("");
   const [categoria, cambiarCategoria] = useState("hogar");
   const [fecha, cambiarFecha] = useState(new Date());
+  const {usuario} = useAuth();
 
   const handleChange = (e) => {
     if(e.target.name === 'descripcion'){
@@ -37,8 +42,23 @@ const FormularioGasto = () => {
     }
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    let cantidad = parseFloat(inputCantidad).toFixed(2);
+
+    // console.log(inputDescripcion, inputCantidad, categoria, fecha);
+    agregarGasto({
+      categoria: categoria,
+      descripcion: inputDescripcion,
+      cantidad: cantidad,
+      fecha: getUnixTime(fecha),
+      uidUsuario: usuario.uid
+    });
+  }
+
   return (
-    <Formulario>
+    <Formulario onSubmit={handleSubmit}>
       <ContenedorFiltros>
         <SelectCategorias 
             categoria={categoria}
