@@ -4,8 +4,11 @@ import {Helmet} from 'react-helmet';
 import BtnRegresar from './../elementos/BtnRegresar';
 import { useAuth } from "./../contextos/AuthContext";
 import BarraTotalGastado from './BarraTotalGastado';
+import useObtenerGastos from './../hooks/useObtenerGastos';
 
 const ListaDeGastos = () => {
+    const gastos = useObtenerGastos();
+    console.log(gastos);
 
     return ( 
         <>
