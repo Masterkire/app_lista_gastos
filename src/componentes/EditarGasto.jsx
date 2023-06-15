@@ -1,8 +1,26 @@
 import React from "react";
+import {Header, Titulo} from './../elementos/Header';
+import {Helmet} from 'react-helmet';
+import BtnRegresar from './../elementos/BtnRegresar';
+import BarraTotalGastado from './BarraTotalGastado';
+import FormularioGasto from './FormularioGasto';
 
 const EditarGasto = () => {
     return ( 
-        <h1>Editar gasto</h1>
+        <>
+            <Helmet>
+                <title>Editar Gasto</title>
+            </Helmet>
+
+            <Header>
+                <BtnRegresar />
+                <Titulo>Editar Gasto</Titulo>
+            </Header>
+
+            <FormularioGasto />
+
+            <BarraTotalGastado />
+        </>
      );
 }
  
