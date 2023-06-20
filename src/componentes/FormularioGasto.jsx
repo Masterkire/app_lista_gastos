@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ContenedorFiltros,
   Formulario,
@@ -14,6 +14,8 @@ import SelectCategorias from "./SelectCategorias";
 import agregarGasto from './../firebase/agregarGasto';
 import {useAuth} from './../contextos/AuthContext';
 import Alerta from './../elementos/Alerta';
+import {useNavigate} from 'react-router-dom';
+import editarGasto from './../firebase/editarGasto';
 
 const IconoPlus = () => {
   return (
@@ -28,7 +30,7 @@ const IconoPlus = () => {
   );
 };
 
-const FormularioGasto = () => {
+const FormularioGasto = ({gasto}) => {
   const [inputDescripcion, cambiarInputDescripcion] = useState("");
   const [inputCantidad, cambiarInputCantidad] = useState("");
   const [categoria, cambiarCategoria] = useState("hogar");
@@ -36,6 +38,24 @@ const FormularioGasto = () => {
   const {usuario} = useAuth();
   const [estadoAlerta, cambiarEstadoAlerta] = useState(false);
   const [alerta, cambiarAlerta] = useState({});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Comprobamos si hay algun gasto.
+    // De ser asi establecemos todo el state con los valores del gasto.
+    if(gasto){
+      //Comprobamos que el gasto sea del usuario actual.
+      // Para eso comprobamos el uid guardado en el gasto con el uid del usuario.
+      if (gasto.data().uidUsuario === usuario.uid) {
+        cambiarCategoria(gasto.data().categoria);
+        cambiarFecha(fromUnixTime(gasto.data().fecha));
+        cambiarInputDescripcion(gasto.data().descripcion);
+        cambiarInputCantidad(gasto.data().cantidad);
+      } else {
+        navigate("/lista");
+      }
+    }
+  }, [gasto, usuario, navigate]);
 
   const handleChange = (e) => {
     if(e.target.name === 'descripcion'){
@@ -54,26 +74,40 @@ const FormularioGasto = () => {
     if (inputDescripcion !== '' && inputCantidad !== '') {
 
       if (cantidad) {
-        agregarGasto({
-          categoria: categoria,
-          descripcion: inputDescripcion,
-          cantidad: cantidad,
-          fecha: getUnixTime(fecha),
-          uidUsuario: usuario.uid
-        })
-        .then(() => {
-          cambiarCategoria('hogar')
-          cambiarInputDescripcion('')
-          cambiarInputCantidad('')
-          cambiarFecha(new Date)
-
-          cambiarEstadoAlerta(true);
-          cambiarAlerta({tipo: 'exito', mensaje: 'El gasto fue agregado correctamente.'})
-        })
-        .catch((error) => {
-          cambiarEstadoAlerta(true);
-          cambiarAlerta({tipo: 'error', mensaje: 'Hubo un problema al intentar agregar tu gasto.'})
-        })
+        if (gasto) {
+          editarGasto({
+            id: gasto.id,
+            categoria: categoria,
+            descripcion: inputDescripcion,
+            cantidad: cantidad,
+            fecha: getUnixTime(fecha)
+          }).then(() => {
+            navigate('/lista');
+          }).catch((error) => {
+            console.log(error);
+          });
+        } else {
+          agregarGasto({
+            categoria: categoria,
+            descripcion: inputDescripcion,
+            cantidad: cantidad,
+            fecha: getUnixTime(fecha),
+            uidUsuario: usuario.uid
+          })
+          .then(() => {
+            cambiarCategoria('hogar')
+            cambiarInputDescripcion('')
+            cambiarInputCantidad('')
+            cambiarFecha(new Date)
+  
+            cambiarEstadoAlerta(true);
+            cambiarAlerta({tipo: 'exito', mensaje: 'El gasto fue agregado correctamente.'})
+          })
+          .catch((error) => {
+            cambiarEstadoAlerta(true);
+            cambiarAlerta({tipo: 'error', mensaje: 'Hubo un problema al intentar agregar tu gasto.'})
+          })
+        }        
       } else {
         cambiarEstadoAlerta(true);
         cambiarAlerta({tipo: 'error', mensaje: 'Por favor rellena todos los campos.'})
@@ -115,7 +149,7 @@ const FormularioGasto = () => {
       </div>
       <ContenedorBoton>
         <Boton as="button" primario conIcono type="submit">
-          Agregar Gasto <IconoPlus />
+          { gasto ? 'Editar Gasto' : 'Agregar Gasto' } <IconoPlus />
         </Boton>
       </ContenedorBoton>
       <Alerta 
